@@ -2,7 +2,6 @@
     <v-app>
         <v-main style="background: linear-gradient(135deg, #f5f0eb 0%, #ede0d4 100%); min-height: 100vh;">
             <v-container class="py-8">
-
                 <!-- LOGIN -->
                 <v-row v-if="!autenticado" justify="center" align="center" style="min-height: 90vh;">
                     <v-col cols="12" sm="8" md="4">
@@ -152,10 +151,8 @@
                                         <span v-else style="color: #ccc;">—</span>
                                     </template>
                                 </v-data-table>
-
                             </v-card-text>
                         </v-card>
-
                     </div>
                 </div>
 
