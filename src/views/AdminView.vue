@@ -110,12 +110,6 @@
                                 <v-data-table :headers="headers" :items="respostas" :search="pesquisa"
                                     :items-per-page="10">
 
-                                    <template #item.acoes="{ item }">
-                                        <v-btn icon color="red" variant="text" @click="eliminarResposta(item.id)">
-                                            <v-icon>mdi-delete</v-icon>
-                                        </v-btn>
-                                    </template>
-
                                     <!-- Slot para coluna "Presença" -->
                                     <template #item.confirmado="{ item }">
                                         <v-chip :color="item.confirmado ? 'green' : 'red'" variant="tonal" rounded="xl"
@@ -150,12 +144,32 @@
                                         </a>
                                         <span v-else style="color: #ccc;">—</span>
                                     </template>
+
+                                    <template #item.total_pessoas="{ item }">
+                                        <v-chip color="#7c5c3e" variant="tonal" size="small">
+                                            👥 {{ item.total_pessoas }}
+                                        </v-chip>
+                                    </template>
+
+                                    <template #item.acoes="{ item }">
+                                        <v-btn icon color="red" variant="text" @click="eliminarResposta(item.id)">
+                                            <v-icon>mdi-delete</v-icon>
+                                        </v-btn>
+                                    </template>
                                 </v-data-table>
                             </v-card-text>
                         </v-card>
                     </div>
                 </div>
 
+            </v-container>
+            <v-container class="d-flex align-center justify-center" style="">
+                <router-link to="/">
+                    <v-btn class="home-button" variant="outlined" color="#7c5c3e" rounded="xl">
+                        <v-icon start>mdi-arrow-left</v-icon>
+                        Convite
+                    </v-btn>
+                </router-link>
             </v-container>
         </v-main>
     </v-app>
@@ -179,6 +193,7 @@ const headers = [
     { title: 'Nome', key: 'nome' },
     { title: 'Parceiro/a', key: 'nome_parceiro' },
     { title: 'Contacto', key: 'contacto' },
+    { title: 'Total Pessoas', key: 'total_pessoas' },
     { title: 'Presença', key: 'confirmado' },
     { title: 'Data', key: 'criado_em' },
     { title: 'Ações', key: 'acoes', sortable: false }
@@ -195,9 +210,8 @@ async function autenticar() {
 
     loadingLogin.value = false
 
-    if (error) {
-        erroLogin.value = true
-    } else {
+    if (error) erroLogin.value = true
+    else {
         autenticado.value = true
         carregarRespostas()
     }
@@ -222,28 +236,28 @@ async function carregarRespostas() {
 
 onMounted(async () => {
     const { data } = await supabase.auth.getSession()
-
     if (data.session) {
         autenticado.value = true
         carregarRespostas()
     }
 })
 
+/* 🔥 CONTADORES NOVOS */
+
 const confirmados = computed(() =>
     respostas.value
         .filter(r => r.confirmado)
-        .reduce((t, r) => t + (r.nome_parceiro ? 2 : 1), 0)
+        .reduce((t, r) => t + (r.total_pessoas || 0), 0)
 )
 
 const recusados = computed(() =>
     respostas.value
         .filter(r => !r.confirmado)
-        .reduce((t, r) => t + (r.nome_parceiro ? 2 : 1), 0)
+        .reduce((t, r) => t + (r.total_pessoas || 0), 0)
 )
 
 async function eliminarResposta(id) {
     const confirmar = confirm('Tens a certeza que queres eliminar esta resposta?')
-
     if (!confirmar) return
 
     const { error } = await supabase
@@ -258,3 +272,13 @@ async function eliminarResposta(id) {
     }
 }
 </script>
+
+<style>
+.home-button {
+    /* position: absolute;
+    top: 20px;
+    left: 20px; */
+    z-index: 10;
+    color: #fff;
+}
+</style>

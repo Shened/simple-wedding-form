@@ -1,17 +1,12 @@
 <template>
     <v-app>
         <v-main style="background: linear-gradient(135deg, #f5f0eb 0%, #ede0d4 100%); min-height: 100vh;">
-            <router-link to="/admin">
-                <v-btn class="admin-button" variant="outlined" color="#7c5c3e" rounded="xl">
-                    <v-icon start>mdi-wrench</v-icon>
-                    Dashboard
-                </v-btn>
-            </router-link>
+
             <v-container class="d-flex align-center justify-center" style="min-height: 100vh;">
-                <v-card max-width="520" width="100%" elevation="8" rounded="xl" class="pa-6">
+                <v-card max-width="520" width="100%" elevation="8" rounded="xl" class="pa-6 mb-6">
 
                     <v-card-title class="text-center flex-column d-flex align-center pb-0">
-                        <!-- <div style="font-size: 2.5rem;">💍</div> -->
+                        <div style="font-size: 2.5rem;">💍</div>
                         <div style="font-family: 'Georgia', serif; font-size: 1.8rem; color: #7c5c3e;">
                             Emanuela & Gilberto
                         </div>
@@ -21,7 +16,7 @@
 
                     <v-card-subtitle class="text-center pb-2" style="font-size: 1rem; color: #6d6d6d;">
                         <p class="mb-2" style="font-weight: bold; color: rgb(124, 92, 62);">
-                            Confirmem a vossa presença no nosso casamento!
+                            Convidamo-vos para o nosso dia especial !
                         </p>
                         <span style="font-size: 1.2rem;">📅 <b>31 de Julho de 2026</b></span>
                     </v-card-subtitle>
@@ -59,6 +54,27 @@
                                 variant="outlined" rounded required class="mb-1" color="#7c5c3e" type="tel"
                                 :rules="[v => /^[0-9]{9}$/.test(v) || 'Introduz um número válido com 9 dígitos']" />
 
+                            <v-checkbox v-model="temFilhos" label="Tenho filhos" color="#7c5c3e" hide-details
+                                class="mb-1" />
+
+                            <div v-if="temFilhos" class="mb-2">
+                                <div v-for="(filho, index) in filhos" :key="index" class="d-flex align-center mb-1">
+                                    <v-text-field v-model="filho.nome" label="Nome" variant="outlined" rounded
+                                        density="comfortable" class="mr-2" color="#7c5c3e" />
+
+                                    <v-text-field v-model="filho.idade" label="Idade" type="number" min="0"
+                                        style="max-width: 100px" variant="outlined" rounded density="comfortable"
+                                        class="mr-2" color="#7c5c3e" />
+
+                                    <v-btn icon="mdi-delete" color="red" variant="text" @click="removerFilho(index)" />
+                                </div>
+
+                                <v-btn variant="tonal" color="#7c5c3e" prepend-icon="mdi-plus" @click="adicionarFilho"
+                                    class="mb-2">
+                                    Adicionar filho
+                                </v-btn>
+                            </div>
+
                             <v-row class="mb-1" no-gutters>
                                 <v-col cols="6" class="pr-2">
                                     <v-btn block size="large" rounded="xl" :loading="loading && confirmado === true"
@@ -84,7 +100,7 @@
                                 <span style="font-size: 0.9rem;">
                                     <p class="mb-1"
                                         style="justify-content: center; display: flex; color: #555; font-weight: bold;">
-                                        Por favor, confirma a tua presença até ao dia 30 de julho.</p>
+                                        Por favor, confirma a tua presença até ao dia 30 de junho.</p>
                                     <p class="mb-0"
                                         style="justify-content: center; display: flex; color: #555; font-weight: bold;">
                                         Obrigado! 🙏</p>
@@ -131,12 +147,20 @@
                     </v-card-text>
                 </v-card>
             </v-container>
+            <v-container class="d-flex align-center justify-center" style="">
+                <router-link to="/admin">
+                    <v-btn class="admin-button" variant="outlined" color="#7c5c3e" rounded="xl">
+                        <v-icon start>mdi-wrench</v-icon>
+                        Dashboard
+                    </v-btn>
+                </router-link>
+            </v-container>
         </v-main>
     </v-app>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { supabase } from '../supabase'
 
 const nome = ref('')
@@ -146,11 +170,36 @@ const loading = ref(false)
 const enviado = ref(false)
 const erro = ref('')
 const contacto = ref('')
+const temFilhos = ref(false)
+
+const filhos = ref([
+    { nome: '', idade: null }
+])
+
+const totalPessoas = computed(() => {
+    let total = 1
+
+    if (nomeParceiro.value) total++
+
+    if (temFilhos.value) {
+        total += filhos.value.length
+    }
+
+    return total
+})
 
 async function submeter(valor) {
     if (!nome.value.trim()) {
         erro.value = 'Por favor indica o teu nome.'
         return
+    }
+    if (temFilhos.value) {
+        const filhosValidos = filhos.value.filter(f => f.nome.trim() !== '' && f.idade !== null)
+
+        if (filhosValidos.length !== filhos.value.length) {
+            erro.value = 'Preenche o nome e idade de todos os filhos.'
+            return
+        }
     }
     confirmado.value = valor
     loading.value = true
@@ -160,7 +209,10 @@ async function submeter(valor) {
         nome: nome.value,
         nome_parceiro: nomeParceiro.value || null,
         confirmado: valor,
-        contacto: contacto.value  // ← adiciona esta linha
+        contacto: contacto.value,
+
+        filhos: temFilhos.value ? filhos.value : null,
+        total_pessoas: totalPessoas.value
     })
 
     if (error) {
@@ -170,13 +222,32 @@ async function submeter(valor) {
     }
     loading.value = false
 }
+
+function adicionarFilho() {
+    filhos.value.push({ nome: '', idade: null })
+}
+
+function removerFilho(index) {
+    filhos.value.splice(index, 1)
+
+    if (filhos.value.length === 0) {
+        temFilhos.value = false
+        filhos.value = [{ nome: '', idade: null }]
+    }
+}
+
+watch(temFilhos, (val) => {
+    if (!val) {
+        filhos.value = [{ nome: '', idade: null }]
+    }
+})
 </script>
 
 <style>
 .admin-button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+    /* position: absolute;
+    bottom: 20px;
+    right: 20px; */
     z-index: 10;
     color: #fff;
 }
