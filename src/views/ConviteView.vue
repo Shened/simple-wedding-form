@@ -14,7 +14,8 @@
                             style="width: 60px; border-color: #c9a96e; border-width: 2px;"></v-divider>
                     </v-card-title>
 
-                    <v-card-subtitle class="text-center pb-2" style="font-size: 1rem; color: #6d6d6d;">
+                    <v-card-subtitle class="text-center pb-2"
+                        style="font-size: 1rem; color: #6d6d6d; white-space: normal; overflow: visible; word-break: break-word;">
                         <p class="mb-2" style="font-weight: bold; color: rgb(124, 92, 62);">
                             Convidamo-vos para o nosso dia especial !
                         </p>
@@ -99,7 +100,7 @@
                             <v-row justify="center" class="">
                                 <span style="font-size: 0.9rem;">
                                     <p class="mb-1"
-                                        style="justify-content: center; display: flex; color: #555; font-weight: bold;">
+                                        style="justify-content: center; display: flex; color: #555; font-weight: bold; text-align: center;">
                                         Por favor, confirma a tua presença até ao dia 30 de junho.</p>
                                     <p class="mb-0"
                                         style="justify-content: center; display: flex; color: #555; font-weight: bold;">
