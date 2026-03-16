@@ -62,7 +62,7 @@
                                     style="background: #7c5c3e;">
                                     <v-icon size="32" color="white" class="mb-2">mdi-email-check</v-icon>
                                     <div style="font-size: 2.2rem; font-weight: bold; color: white;">{{ respostas.length
-                                    }}</div>
+                                        }}</div>
                                     <div style="color: #f0e0cc;">Respostas recebidas</div>
                                 </v-card>
                             </v-col>
@@ -99,11 +99,18 @@
                                 <v-data-table :headers="headers" :items="respostas" :search="pesquisa"
                                     :items-per-page="10" item-value="id">
 
+                                    <template #item.info="{ item }">
+                                        <v-btn icon variant="text" color="#7c5c3e" size="small"
+                                            @click="abrirModal(item)">
+                                            <v-icon>mdi-information-outline</v-icon>
+                                        </v-btn>
+                                    </template>
+
                                     <template #item.confirmado="{ item }">
                                         <v-chip :color="item.confirmado ? 'green' : 'red'" variant="tonal" rounded="xl"
                                             size="small">
                                             <v-icon start size="small">{{ item.confirmado ? 'mdi-check' : 'mdi-close'
-                                            }}</v-icon>
+                                                }}</v-icon>
                                             {{ item.confirmado ? 'Confirmado' : 'Não vai' }}
                                         </v-chip>
                                     </template>
@@ -137,10 +144,8 @@
                                     </template>
 
                                     <template #item.acoes="{ item }">
-                                        <v-btn icon variant="text" color="#7c5c3e" @click="abrirModal(item)">
-                                            <v-icon>mdi-information-outline</v-icon>
-                                        </v-btn>
-                                        <v-btn icon variant="text" color="red" @click="eliminarResposta(item.id)">
+                                        <v-btn icon variant="text" color="red" size="small"
+                                            @click="eliminarResposta(item.id)">
                                             <v-icon>mdi-delete</v-icon>
                                         </v-btn>
                                     </template>
@@ -258,6 +263,7 @@ const modal = ref(false)
 const selecionado = ref(null)
 
 const headers = [
+    { title: '', key: 'info', sortable: false },
     { title: 'Nome', key: 'nome' },
     { title: 'Parceiro/a', key: 'nome_parceiro' },
     { title: 'Contacto', key: 'contacto' },
